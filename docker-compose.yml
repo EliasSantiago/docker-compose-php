@@ -1,0 +1,40 @@
+version: '3'
+services:
+  app:
+    build:
+      args:
+        user: my-mint
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: app
+    container_name: app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/usr/share/nginx
+    networks:
+      - app
+
+  mysql-app:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    volumes:
+      - .docker/dbdata:/var/lib/mysql
+    container_name: app-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    networks:
+      - app
+
+networks:
+  app:
+    driver: bridge
